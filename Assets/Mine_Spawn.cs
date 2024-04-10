@@ -9,22 +9,20 @@ public class Mine_Spawn : MonoBehaviour
 
 
     [SerializeField] Transform max_xy;
-    [SerializeField] Transform temp;
     [SerializeField] Box box;
 
     private Vector3 now_transform;
-    private float now_x = 0;
-    private float now_y = 0;
+    private float now_x;
+    private float now_y;
     private int[,] map;
     Box[,] block;
     List<Box> mineList = new();
 
-    public Vector3 mine_transform;
     public Vector3 spawn_transform;
     public int mine;
     public int row_column;
-    public float divide_x = 0;
-    public float divide_y = 0;
+    public float divide_x;
+    public float divide_y;
 
     public enum MineType
     {
@@ -37,12 +35,20 @@ public class Mine_Spawn : MonoBehaviour
         Instance = this;
     }
 
-    public void InitMine(){
+    public void InitMine()
+    {
         spawn_transform = Vector3.zero;
+        map = null;
+        block = null;
+        mineList.Clear();
+
         map = new int[row_column, row_column];
         block = new Box[row_column, row_column];
 
-        
+        now_x = 0;
+        now_y = 0;
+        GameManager.Instance.isEnd = false;
+        ObjectPool.Reset();
 
         for (int mineCount = 0; mineCount < mine; ++mineCount)
         {
@@ -94,20 +100,18 @@ public class Mine_Spawn : MonoBehaviour
                 spawn_transform = transform.position + now_transform;
                 divide_x += max_xy.transform.lossyScale.x / row_column;
 
+                block[i, j] = ObjectPool.GetObject();
+                block[i, j].Init();
+                block[i, j].transform.position = spawn_transform;
+                block[i, j].transform.localScale = box.transform.localScale;
+                block[i, j].myx = i;
+                block[i, j].myy = j;
+                block[i, j].mynum = map[i, j];
+
                 if (map[i, j] == -1)
                 {
-                    block[i, j] = Instantiate(box, spawn_transform, transform.rotation);
                     block[i, j].isMine = true;
-                    block[i, j].mynum = map[i, j];
                     mineList.Add(block[i, j]);
-                }
-                else
-                {
-                    block[i, j] = Instantiate(box, spawn_transform, transform.rotation);
-
-                    block[i, j].myx = i;
-                    block[i, j].myy = j;
-                    block[i, j].mynum = map[i, j];
                 }
             }
         }
@@ -119,7 +123,7 @@ public class Mine_Spawn : MonoBehaviour
         {
             if (i < 0) i++;
             if (row_column <= i) break;
-            
+
             for (int j = x - 1; j <= x + 1; j++)
             {
                 if (j < 0) j++;
@@ -144,7 +148,7 @@ public class Mine_Spawn : MonoBehaviour
         {
             if (i < 0) i++;
             if (row_column <= i) break;
-            
+
             for (int j = x - 1; j <= x + 1; j++)
             {
                 if (j < 0) j++;
@@ -152,11 +156,11 @@ public class Mine_Spawn : MonoBehaviour
 
                 var b = block[j, i].GetComponent<Box>();
 
-                if(b.isFlag) flagCount++;
+                if (b.isFlag) flagCount++;
             }
         }
 
-        if(block[x, y].GetComponent<Box>().mynum == flagCount) CheckMine(x, y);
+        if (block[x, y].GetComponent<Box>().mynum == flagCount) CheckMine(x, y);
     }
 
     public void CheckMine(int x, int y)
@@ -165,7 +169,7 @@ public class Mine_Spawn : MonoBehaviour
         {
             if (i < 0) i++;
             if (row_column <= i) break;
-            
+
             for (int j = x - 1; j <= x + 1; j++)
             {
                 if (j < 0) j++;
@@ -176,13 +180,15 @@ public class Mine_Spawn : MonoBehaviour
 
                 b.Click();
                 if (b.mynum == 0) CheckZero(j, i);
-                if(b.isMine) GameManager.Instance.End();
+                if (b.isMine) GameManager.Instance.End();
             }
         }
     }
 
-    public void Boom(){
-        foreach(var m in mineList){
+    public void Boom()
+    {
+        foreach (var m in mineList)
+        {
             m.Click();
         }
     }

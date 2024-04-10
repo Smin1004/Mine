@@ -18,9 +18,13 @@ public class Box : MonoBehaviour
     public bool isFlag;
     public bool isClick;
 
-    private void Start()
-    {
+    public void Init(){
         sprite = GetComponent<SpriteRenderer>();
+
+        sprite.sprite = box;
+        isClick = false;
+        isMine = false;
+        isFlag = false;
     }
 
     public void Click()

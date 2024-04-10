@@ -9,6 +9,7 @@ public class Mine_Spawn : MonoBehaviour
 
 
     [SerializeField] Transform max_xy;
+    [SerializeField] Transform temp;
     [SerializeField] Box box;
 
     private Vector3 now_transform;
@@ -22,7 +23,6 @@ public class Mine_Spawn : MonoBehaviour
     public Vector3 spawn_transform;
     public int mine;
     public int row_column;
-    public int now_num;
     public float divide_x = 0;
     public float divide_y = 0;
 
@@ -34,11 +34,15 @@ public class Mine_Spawn : MonoBehaviour
 
     private void Awake()
     {
-
         Instance = this;
+    }
 
+    public void InitMine(){
+        spawn_transform = Vector3.zero;
         map = new int[row_column, row_column];
         block = new Box[row_column, row_column];
+
+        
 
         for (int mineCount = 0; mineCount < mine; ++mineCount)
         {
@@ -75,7 +79,7 @@ public class Mine_Spawn : MonoBehaviour
         divide_y = max_xy.transform.lossyScale.y / row_column;
 
         now_y -= divide_y / 2;
-        now_transform = new Vector3(0, 0);
+        now_transform = Vector3.zero;
         box.transform.localScale = new Vector3(divide_x, divide_y, 1);
 
         for (int i = 0; i < row_column; i++)
